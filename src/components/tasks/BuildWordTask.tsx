@@ -55,9 +55,9 @@ export function BuildWordTask({
 
   return (
     <div>
-      <p className="mb-5 text-center text-lg font-bold text-slate-700">{task.prompt}</p>
+      <p className="mb-5 text-center text-lg font-bold text-slate-700 lg:mb-8 lg:text-2xl">{task.prompt}</p>
 
-      <div className="mb-5 flex flex-col gap-3">
+      <div className="mb-5 flex flex-col gap-3 lg:mb-8 lg:gap-4">
         {task.words.map((w, i) => {
           const built = slots[i].map((t) => t.text).join("");
           const isCorrect = checked && built === w.target;
@@ -67,7 +67,7 @@ export function BuildWordTask({
               key={i}
               onClick={() => clearSlot(i)}
               disabled={checked}
-              className={`flex min-h-14 items-center justify-center gap-1 rounded-2xl border-2 border-dashed px-4 py-2 font-[var(--font-display)] text-2xl font-extrabold transition ${
+              className={`flex min-h-14 items-center justify-center gap-1 rounded-2xl border-2 border-dashed px-4 py-2 font-[var(--font-display)] text-2xl font-extrabold transition lg:min-h-20 lg:gap-2 lg:px-6 lg:py-3 lg:text-4xl ${
                 isCorrect
                   ? "border-emerald-400 bg-emerald-50 text-emerald-700"
                   : isWrong
@@ -78,24 +78,24 @@ export function BuildWordTask({
               }`}
             >
               {Array.from({ length: w.tiles.length }).map((_, slotPos) => (
-                <span key={slotPos} className="inline-block min-w-8 border-b-2 border-slate-300 text-center">
+                <span key={slotPos} className="inline-block min-w-8 border-b-2 border-slate-300 text-center lg:min-w-12">
                   {slots[i][slotPos]?.text ?? " "}
                 </span>
               ))}
-              {checked && <span className="ml-1 text-lg">{isCorrect ? "✅" : "❌"}</span>}
-              {isWrong && <span className="ml-2 text-sm text-rose-500">({w.target})</span>}
+              {checked && <span className="ml-1 text-lg lg:text-2xl">{isCorrect ? "✅" : "❌"}</span>}
+              {isWrong && <span className="ml-2 text-sm text-rose-500 lg:text-lg">({w.target})</span>}
             </button>
           );
         })}
       </div>
 
-      <div className="flex flex-wrap justify-center gap-2.5">
+      <div className="flex flex-wrap justify-center gap-2.5 lg:gap-4">
         {bank.map((tile) => (
           <button
             key={tile.id}
             onClick={() => placeTile(tile)}
             disabled={checked}
-            className="min-w-12 rounded-2xl border-2 border-teal-300 bg-white px-4 py-2.5 text-lg font-extrabold text-teal-700 shadow-sm transition active:scale-95 disabled:opacity-40"
+            className="min-w-12 rounded-2xl border-2 border-teal-300 bg-white px-4 py-2.5 text-lg font-extrabold text-teal-700 shadow-sm transition active:scale-95 disabled:opacity-40 lg:min-w-16 lg:px-6 lg:py-4 lg:text-2xl"
           >
             {tile.text}
           </button>

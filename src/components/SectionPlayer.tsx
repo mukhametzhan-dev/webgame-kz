@@ -31,20 +31,20 @@ export function SectionPlayer({
   };
 
   return (
-    <div className="relative z-10 mx-auto w-full max-w-2xl px-4 pb-16 pt-4 sm:px-6">
-      <div className="mb-5 flex items-center justify-center gap-1.5">
+    <div className="relative z-10 mx-auto w-full max-w-2xl px-4 py-8 sm:px-6 lg:max-w-3xl lg:py-10 xl:max-w-4xl">
+      <div className="mb-5 flex items-center justify-center gap-1.5 lg:mb-8 lg:gap-2">
         {section.tasks.map((t, i) => (
           <span
             key={t.id}
-            className={`h-2.5 rounded-full transition-all ${
-              i === index ? "w-7 bg-white" : scores[i] >= 0 ? "w-2.5 bg-white/80" : "w-2.5 bg-white/30"
+            className={`h-2.5 rounded-full transition-all lg:h-3.5 ${
+              i === index ? "w-7 bg-white lg:w-10" : scores[i] >= 0 ? "w-2.5 bg-white/80 lg:w-3.5" : "w-2.5 bg-white/30 lg:w-3.5"
             }`}
           />
         ))}
       </div>
 
-      <div className="animate-pop-in rounded-3xl bg-white p-5 shadow-xl sm:p-7">
-        <p className="mb-1 text-center text-xs font-bold uppercase tracking-wide text-slate-400">
+      <div className="animate-pop-in rounded-3xl bg-white p-5 shadow-xl sm:p-7 lg:p-10">
+        <p className="mb-1 text-center text-xs font-bold uppercase tracking-wide text-slate-400 lg:mb-2 lg:text-sm">
           {section.title} · {index + 1}/{section.tasks.length}
         </p>
         <TaskRenderer key={task.id} task={task} isLast={isLast} onAdvance={handleAdvance} onFeedback={onFeedback} />

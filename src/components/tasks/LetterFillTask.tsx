@@ -26,8 +26,8 @@ export function LetterFillTask({
 
   return (
     <div>
-      <p className="mb-5 text-center text-lg font-bold text-slate-700">{task.prompt}</p>
-      <div className="flex flex-col gap-4">
+      <p className="mb-5 text-center text-lg font-bold text-slate-700 lg:mb-8 lg:text-2xl">{task.prompt}</p>
+      <div className="flex flex-col gap-4 lg:gap-5">
         {task.items.map((it, i) => {
           const picked = answers[i];
           const isCorrect = checked && picked === it.correct;
@@ -35,14 +35,14 @@ export function LetterFillTask({
           return (
             <div
               key={i}
-              className={`rounded-2xl border-2 p-3 transition ${
+              className={`rounded-2xl border-2 p-3 transition lg:p-5 ${
                 checked ? (isCorrect ? "border-emerald-300 bg-emerald-50" : "border-rose-300 bg-rose-50") : "border-slate-200 bg-white"
               }`}
             >
-              <p className="mb-2 text-center font-[var(--font-display)] text-xl font-extrabold text-slate-800">
+              <p className="mb-2 text-center font-[var(--font-display)] text-xl font-extrabold text-slate-800 lg:mb-3 lg:text-3xl">
                 {checked && isCorrect ? it.result : it.stem} {checked && (isCorrect ? "✅" : "❌")}
               </p>
-              <div className="flex flex-wrap justify-center gap-2">
+              <div className="flex flex-wrap justify-center gap-2 lg:gap-3">
                 {it.options.map((opt) => {
                   const selected = picked === opt;
                   let cls = "border-slate-200 bg-white text-slate-600";
@@ -54,14 +54,14 @@ export function LetterFillTask({
                       key={opt}
                       disabled={checked}
                       onClick={() => setAnswers((prev) => ({ ...prev, [i]: opt }))}
-                      className={`rounded-full border-2 px-4 py-1.5 text-lg font-extrabold transition ${cls}`}
+                      className={`rounded-full border-2 px-4 py-1.5 text-lg font-extrabold transition lg:px-6 lg:py-2.5 lg:text-2xl ${cls}`}
                     >
                       {opt}
                     </button>
                   );
                 })}
               </div>
-              {isWrong && <p className="mt-2 text-center text-xs font-semibold text-rose-500">Дұрысы: {it.result}</p>}
+              {isWrong && <p className="mt-2 text-center text-xs font-semibold text-rose-500 lg:text-sm">Дұрысы: {it.result}</p>}
             </div>
           );
         })}

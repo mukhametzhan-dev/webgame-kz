@@ -30,7 +30,7 @@ export function ResultsScreen({
   const stars = starsFor(percent);
 
   return (
-    <div className="relative z-10 mx-auto flex w-full max-w-lg flex-col items-center px-4 pb-16 pt-10 sm:px-6">
+    <div className="relative z-10 mx-auto flex w-full max-w-lg flex-col items-center px-4 py-10 sm:px-6 lg:max-w-xl">
       {stars >= 2 && (
         <div className="pointer-events-none absolute inset-x-0 top-0 flex justify-center overflow-hidden" aria-hidden="true">
           {Array.from({ length: 24 }).map((_, i) => (
@@ -48,15 +48,15 @@ export function ResultsScreen({
         </div>
       )}
 
-      <div className="animate-pop-in w-full rounded-3xl bg-white p-7 text-center shadow-xl">
+      <div className="animate-pop-in w-full rounded-3xl bg-white p-7 text-center shadow-xl lg:p-10">
         <p
-          className={`flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br ${section.color} mx-auto text-4xl font-extrabold text-white shadow-lg`}
+          className={`flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br ${section.color} mx-auto text-4xl font-extrabold text-white shadow-lg lg:h-28 lg:w-28 lg:text-6xl`}
         >
           {section.letter}
         </p>
-        <h2 className="mt-4 font-[var(--font-display)] text-2xl font-extrabold text-slate-800">{section.title}</h2>
+        <h2 className="mt-4 font-[var(--font-display)] text-2xl font-extrabold text-slate-800 lg:mt-6 lg:text-4xl">{section.title}</h2>
 
-        <div className="my-5 flex justify-center gap-2 text-4xl">
+        <div className="my-5 flex justify-center gap-2 text-4xl lg:my-8 lg:gap-4 lg:text-6xl">
           {[0, 1, 2].map((i) => (
             <span key={i} className={i < stars ? "animate-pop-in" : "opacity-25"} style={{ animationDelay: `${i * 0.15}s` }}>
               ⭐
@@ -64,19 +64,19 @@ export function ResultsScreen({
           ))}
         </div>
 
-        <p className="text-lg font-bold text-teal-600">{percent}% дұрыс</p>
-        <p className="mt-2 text-slate-500">{messageFor(percent)}</p>
+        <p className="text-lg font-bold text-teal-600 lg:text-2xl">{percent}% дұрыс</p>
+        <p className="mt-2 text-slate-500 lg:mt-3 lg:text-xl">{messageFor(percent)}</p>
 
-        <div className="mt-7 flex gap-3">
+        <div className="mt-7 flex gap-3 lg:mt-10 lg:gap-4">
           <button
             onClick={onRetry}
-            className="flex-1 rounded-2xl bg-slate-100 py-3 font-extrabold text-slate-600 transition hover:bg-slate-200"
+            className="flex-1 rounded-2xl bg-slate-100 py-3 font-extrabold text-slate-600 transition hover:bg-slate-200 lg:py-4 lg:text-lg"
           >
             ↻ Қайталау
           </button>
           <button
             onClick={onHome}
-            className="flex-1 rounded-2xl bg-teal-500 py-3 font-extrabold text-white shadow-md transition hover:bg-teal-600"
+            className="flex-1 rounded-2xl bg-teal-500 py-3 font-extrabold text-white shadow-md transition hover:bg-teal-600 lg:py-4 lg:text-lg"
           >
             🏠 Басты бет
           </button>

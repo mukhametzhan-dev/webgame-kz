@@ -45,9 +45,9 @@ export function ColorShapesTask({
 
   return (
     <div>
-      <p className="mb-4 text-center text-lg font-bold text-slate-700">{task.prompt}</p>
+      <p className="mb-4 text-center text-lg font-bold text-slate-700 lg:mb-6 lg:text-2xl">{task.prompt}</p>
 
-      <div className="mb-4 flex flex-col gap-1.5 rounded-2xl bg-slate-50 p-3 text-sm text-slate-600">
+      <div className="mb-4 flex flex-col gap-1.5 rounded-2xl bg-slate-50 p-3 text-sm text-slate-600 lg:mb-6 lg:gap-2 lg:p-5 lg:text-lg">
         {task.quadrants.map((q) => (
           <p key={q.key}>
             <b>{describe(q.key)}</b> — <span style={{ color: q.colorHex }}>{q.colorName}</span>
@@ -55,15 +55,15 @@ export function ColorShapesTask({
         ))}
       </div>
 
-      <p className="mb-2 text-center text-sm font-bold text-slate-500">1. Түсті таңда:</p>
-      <div className="mb-5 flex flex-wrap justify-center gap-2">
+      <p className="mb-2 text-center text-sm font-bold text-slate-500 lg:mb-3 lg:text-lg">1. Түсті таңда:</p>
+      <div className="mb-5 flex flex-wrap justify-center gap-2 lg:mb-8 lg:gap-3">
         {palette.map((c) => (
           <button
             key={c.colorHex}
             onClick={() => setSelectedColor(c.colorHex)}
             disabled={checked}
             aria-label={c.colorName}
-            className={`h-11 w-11 rounded-full border-4 shadow transition active:scale-90 ${
+            className={`h-11 w-11 rounded-full border-4 shadow transition active:scale-90 lg:h-16 lg:w-16 ${
               selectedColor === c.colorHex ? "border-slate-700" : "border-white"
             }`}
             style={{ backgroundColor: c.colorHex }}
@@ -71,8 +71,8 @@ export function ColorShapesTask({
         ))}
       </div>
 
-      <p className="mb-2 text-center text-sm font-bold text-slate-500">2. Фигураны бас:</p>
-      <div className="mx-auto grid w-56 grid-cols-2 grid-rows-2 gap-4">
+      <p className="mb-2 text-center text-sm font-bold text-slate-500 lg:mb-3 lg:text-lg">2. Фигураны бас:</p>
+      <div className="mx-auto grid w-56 grid-cols-2 grid-rows-2 gap-4 lg:w-80 lg:gap-6">
         {task.quadrants.map((q) => {
           const fill = fills[q.key];
           const isCorrect = checked && fill === q.colorHex;
@@ -87,7 +87,7 @@ export function ColorShapesTask({
               }`}
               style={{ backgroundColor: fill ?? "#f8fafc" }}
             >
-              {checked && <span className="text-2xl">{isCorrect ? "✅" : "❌"}</span>}
+              {checked && <span className="text-2xl lg:text-4xl">{isCorrect ? "✅" : "❌"}</span>}
             </button>
           );
         })}

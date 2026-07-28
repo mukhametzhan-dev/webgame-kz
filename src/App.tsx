@@ -27,7 +27,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-teal-500 via-teal-500 to-emerald-600">
-      <div className="relative min-h-screen">
+      <div className="relative flex min-h-screen flex-col">
         <BackgroundDecor />
         <TopBar
           soundOn={sound.enabled}
@@ -37,29 +37,31 @@ function App() {
           homeButton={view.name !== "home" ? { label: "Басты бет", onClick: goHome } : undefined}
         />
 
-        {view.name === "home" && <Home sections={sections} progress={progress} onSelect={(id) => setView({ name: "section", sectionId: id })} />}
+        <div className="flex flex-1 items-center justify-center">
+          {view.name === "home" && <Home sections={sections} progress={progress} onSelect={(id) => setView({ name: "section", sectionId: id })} />}
 
-        {view.name === "section" && currentSection && (
-          <SectionPlayer
-            key={currentSection.id}
-            section={currentSection}
-            onFeedback={(percent) => sound.play(percent >= 100 ? "correct" : "wrong")}
-            onFinish={(percent) => {
-              recordResult(currentSection.id, percent);
-              sound.play(percent >= 90 ? "win" : percent >= 60 ? "correct" : "wrong");
-              setView({ name: "results", sectionId: currentSection.id, percent });
-            }}
-          />
-        )}
+          {view.name === "section" && currentSection && (
+            <SectionPlayer
+              key={currentSection.id}
+              section={currentSection}
+              onFeedback={(percent) => sound.play(percent >= 100 ? "correct" : "wrong")}
+              onFinish={(percent) => {
+                recordResult(currentSection.id, percent);
+                sound.play(percent >= 90 ? "win" : percent >= 60 ? "correct" : "wrong");
+                setView({ name: "results", sectionId: currentSection.id, percent });
+              }}
+            />
+          )}
 
-        {view.name === "results" && currentSection && (
-          <ResultsScreen
-            section={currentSection}
-            percent={view.percent}
-            onRetry={() => setView({ name: "section", sectionId: currentSection.id })}
-            onHome={goHome}
-          />
-        )}
+          {view.name === "results" && currentSection && (
+            <ResultsScreen
+              section={currentSection}
+              percent={view.percent}
+              onRetry={() => setView({ name: "section", sectionId: currentSection.id })}
+              onHome={goHome}
+            />
+          )}
+        </div>
 
         {modal === "progress" && <ProgressModal sections={sections} progress={progress} totalStars={totalStars} onClose={() => setModal(null)} />}
         {modal === "settings" && (

@@ -46,8 +46,8 @@ export function ChipSelectTask({
 
   return (
     <div>
-      <p className="mb-5 text-center text-lg font-bold text-slate-700">{task.prompt}</p>
-      <div className="flex flex-wrap justify-center gap-2.5">
+      <p className="mb-5 text-center text-lg font-bold text-slate-700 lg:mb-8 lg:text-2xl">{task.prompt}</p>
+      <div className="flex flex-wrap justify-center gap-2.5 lg:gap-4">
         {task.items.map((item, i) => {
           const picked = selected.has(i);
           const isTarget = targets[i];
@@ -65,7 +65,7 @@ export function ChipSelectTask({
               key={i}
               onClick={() => toggle(i)}
               disabled={checked}
-              className={`min-w-12 rounded-2xl border-2 px-4 py-2.5 text-lg font-extrabold shadow-sm transition ${cls} ${!checked ? "active:scale-95" : ""}`}
+              className={`min-w-12 rounded-2xl border-2 px-4 py-2.5 text-lg font-extrabold shadow-sm transition lg:min-w-16 lg:px-6 lg:py-4 lg:text-2xl ${cls} ${!checked ? "active:scale-95" : ""}`}
             >
               {item}
             </button>
