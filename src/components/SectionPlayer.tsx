@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Section } from "../types";
 import { TaskRenderer } from "./tasks/TaskRenderer";
 
@@ -16,6 +16,16 @@ export function SectionPlayer({
 
   const task = section.tasks[index];
   const isLast = index === section.tasks.length - 1;
+
+  // Мұғалім үшін жасырын пернетақта басқару: тапсырмалар арасында ← / → көмегімен жылжу.
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "ArrowRight") setIndex((i) => Math.min(i + 1, section.tasks.length - 1));
+      else if (e.key === "ArrowLeft") setIndex((i) => Math.max(i - 1, 0));
+    };
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [section.tasks.length]);
 
   const handleAdvance = (percent: number) => {
     const nextScores = [...scores];

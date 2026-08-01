@@ -14,6 +14,34 @@ const gridPosition: Record<string, string> = {
   "bottom-right": "col-start-2 row-start-2",
 };
 
+type Shape = "square" | "triangle" | "circle" | "trapezoid" | "letter";
+
+function ShapeIcon({ shape, fill, stroke, letterText }: { shape: Shape; fill: string; stroke: string; letterText?: string }) {
+  const common = { fill, stroke, strokeWidth: 4, strokeLinejoin: "round" as const };
+  return (
+    <svg viewBox="0 0 100 100" className="h-full w-full">
+      {shape === "circle" && <circle cx="50" cy="50" r="42" {...common} />}
+      {shape === "triangle" && <polygon points="8,18 92,18 50,90" {...common} />}
+      {shape === "trapezoid" && <polygon points="30,10 70,10 96,90 4,90" {...common} />}
+      {shape === "square" && <rect x="8" y="8" width="84" height="84" rx="14" {...common} />}
+      {shape === "letter" && (
+        <text
+          x="50"
+          y="54"
+          textAnchor="middle"
+          dominantBaseline="middle"
+          fontSize="80"
+          fontWeight="800"
+          fontFamily="'Segoe UI', sans-serif"
+          {...common}
+        >
+          {letterText}
+        </text>
+      )}
+    </svg>
+  );
+}
+
 export function ColorShapesTask({
   task,
   isLast,
@@ -73,25 +101,62 @@ export function ColorShapesTask({
 
       <p className="mb-2 text-center text-sm font-bold text-slate-500 lg:mb-3 lg:text-lg">2. Фигураны бас:</p>
       <div className="mx-auto grid w-56 grid-cols-2 grid-rows-2 gap-4 lg:w-80 lg:gap-6">
-        {task.quadrants.map((q) => {
-          const fill = fills[q.key];
-          const isCorrect = checked && fill === q.colorHex;
-          const isWrong = checked && fill !== q.colorHex;
-          return (
-            <button
-              key={q.key}
-              onClick={() => selectedColor && !checked && setFills((prev) => ({ ...prev, [q.key]: selectedColor }))}
-              disabled={checked}
-              className={`${gridPosition[q.key]} flex aspect-square items-center justify-center rounded-3xl border-4 shadow-inner transition ${
-                isCorrect ? "border-emerald-400" : isWrong ? "border-rose-400" : "border-slate-300"
-              }`}
-              style={{ backgroundColor: fill ?? "#f8fafc" }}
-            >
-              {checked && <span className="text-2xl lg:text-4xl">{isCorrect ? "✅" : "❌"}</span>}
-            </button>
-          );
-        })}
+        {task.quadrants
+          .filter((q) => q.key !== "extra")
+          .map((q) => {
+            const fill = fills[q.key];
+            const isCorrect = checked && fill === q.colorHex;
+            const isWrong = checked && fill !== q.colorHex;
+            return (
+              <button
+                key={q.key}
+                onClick={() => selectedColor && !checked && setFills((prev) => ({ ...prev, [q.key]: selectedColor }))}
+                disabled={checked}
+                className={`${gridPosition[q.key]} relative flex aspect-square items-center justify-center transition`}
+              >
+                <ShapeIcon
+                  shape={q.shape ?? "square"}
+                  fill={fill ?? "#f8fafc"}
+                  stroke={isCorrect ? "#34d399" : isWrong ? "#fb7185" : "#cbd5e1"}
+                  letterText={q.letterText}
+                />
+                {checked && (
+                  <span className="absolute text-2xl drop-shadow lg:text-4xl">{isCorrect ? "✅" : "❌"}</span>
+                )}
+              </button>
+            );
+          })}
       </div>
+
+      {task.quadrants.some((q) => q.key === "extra") && (
+        <div className="mx-auto mt-4 flex w-56 justify-center lg:mt-6 lg:w-80">
+          {task.quadrants
+            .filter((q) => q.key === "extra")
+            .map((q) => {
+              const fill = fills[q.key];
+              const isCorrect = checked && fill === q.colorHex;
+              const isWrong = checked && fill !== q.colorHex;
+              return (
+                <button
+                  key={q.key}
+                  onClick={() => selectedColor && !checked && setFills((prev) => ({ ...prev, [q.key]: selectedColor }))}
+                  disabled={checked}
+                  className="relative flex aspect-square w-24 items-center justify-center transition lg:w-32"
+                >
+                  <ShapeIcon
+                    shape={q.shape ?? "square"}
+                    fill={fill ?? "#f8fafc"}
+                    stroke={isCorrect ? "#34d399" : isWrong ? "#fb7185" : "#cbd5e1"}
+                    letterText={q.letterText}
+                  />
+                  {checked && (
+                    <span className="absolute text-2xl drop-shadow lg:text-4xl">{isCorrect ? "✅" : "❌"}</span>
+                  )}
+                </button>
+              );
+            })}
+        </div>
+      )}
 
       <TaskActions
         checked={checked}
@@ -117,7 +182,9 @@ function describe(key: string) {
       return "Оң жақтағы жоғарғы фигура";
     case "bottom-left":
       return "Сол жақтағы төменгі фигура";
-    default:
+    case "bottom-right":
       return "Оң жақтағы төменгі фигура";
+    default:
+      return "Төмендегі қосымша фигура";
   }
 }

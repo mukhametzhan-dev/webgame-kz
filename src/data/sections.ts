@@ -1,4 +1,4 @@
-import type { Section, Task, Position } from "../types";
+import type { Section, Task, SoundPosition } from "../types";
 
 const norm = (s: string) => s.toLocaleLowerCase("kk");
 
@@ -8,49 +8,89 @@ const contains = (letter: string) => (item: string) => norm(item).includes(norm(
 let uid = 0;
 const id = (prefix: string) => `${prefix}-${uid++}`;
 
-function chipSelect(
-  prompt: string,
-  actionEmoji: string,
-  actionLabel: string,
-  items: string[],
-  target: (item: string) => boolean
-): Task {
-  return {
-    type: "chip-select",
-    id: id("cs"),
-    prompt,
-    actionEmoji,
-    actionLabel,
-    items,
-    isTarget: (item) => target(item),
-  };
-}
-
-function positionChoice(prompt: string, words: { word: string; correct: Position }[]): Task {
-  return { type: "position-choice", id: id("pc"), prompt, words };
-}
-
-function letterFill(prompt: string, items: { stem: string; options: string[]; correct: string; result: string }[]): Task {
-  return { type: "letter-fill", id: id("lf"), prompt, items };
-}
-
 function buildWord(prompt: string, pool: string[], words: { target: string; tiles: string[] }[]): Task {
   return { type: "build-word", id: id("bw"), prompt, pool, words };
 }
 
-function countChoice(prompt: string, items: { word: string; correct: number; options: number[] }[]): Task {
-  return { type: "count-choice", id: id("cc"), prompt, items };
-}
-
 function colorShapes(
   prompt: string,
-  quadrants: { key: "top-left" | "top-right" | "bottom-left" | "bottom-right"; colorName: string; colorHex: string }[]
+  quadrants: {
+    key: "top-left" | "top-right" | "bottom-left" | "bottom-right" | "extra";
+    colorName: string;
+    colorHex: string;
+    shape?: "square" | "triangle" | "circle" | "trapezoid" | "letter";
+    letterText?: string;
+  }[]
 ): Task {
   return { type: "color-shapes", id: id("col"), prompt, quadrants };
 }
 
-function practice(prompt: string, items: string[], actionLabel: string): Task {
-  return { type: "practice", id: id("pr"), prompt, items, actionLabel } as Task;
+function soundReaction(
+  prompt: string,
+  itemKind: "sound" | "syllable" | "word",
+  items: string[],
+  target: (item: string) => boolean,
+  reactionEmoji: string,
+  reactionLabel: string
+): Task {
+  return {
+    type: "sound-reaction",
+    id: id("sr"),
+    prompt,
+    itemKind,
+    items,
+    isTarget: (item) => target(item),
+    reactionEmoji,
+    reactionLabel,
+  };
+}
+
+function positionDetect(
+  prompt: string,
+  variant: "hands" | "notebook" | "face" | "clap" | "clap-count" | "segments",
+  words: { word: string; correct: SoundPosition }[]
+): Task {
+  return { type: "position-detect", id: id("pd"), prompt, variant, words };
+}
+
+function letterSwap(
+  prompt: string,
+  letter: string,
+  items: { before: string; prefix?: string; rest: string; result: string }[]
+): Task {
+  return { type: "letter-swap", id: id("ls"), prompt, letter, items };
+}
+
+function phonemeScheme(prompt: string, words: { word: string; sounds: string[] }[]): Task {
+  return { type: "phoneme-scheme", id: id("ph"), prompt, words };
+}
+
+function tracingCanvas(prompt: string, letter: string, mode?: "bilateral" | "trace-free"): Task {
+  return { type: "tracing-canvas", id: id("tr"), prompt, letter, mode };
+}
+
+function strikeThrough(prompt: string, letter: string, count: number): Task {
+  return { type: "strike-through", id: id("st"), prompt, letter, count };
+}
+
+function infoSlide(prompt: string, image?: string): Task {
+  return { type: "info-slide", id: id("is"), prompt, image };
+}
+
+function blackboard(prompt: string, letter: string): Task {
+  return { type: "blackboard", id: id("bb"), prompt, letter };
+}
+
+function syllablePractice(prompt: string, sets: string[][]): Task {
+  return { type: "syllable-practice", id: id("sp"), prompt, sets };
+}
+
+function imageWord(prompt: string, letter: string, items: { image: string; word: string }[]): Task {
+  return { type: "image-word", id: id("iw"), prompt, letter, items };
+}
+
+function spatialDrag(prompt: string, letter: string, items: { word: string; correct: "plain" | "target" }[]): Task {
+  return { type: "spatial-drag", id: id("sd"), prompt, letter, items };
 }
 
 export const sections: Section[] = [
@@ -62,35 +102,38 @@ export const sections: Section[] = [
     color: "from-rose-400 to-orange-400",
     ring: "ring-rose-200",
     tasks: [
-      chipSelect(
-        "А дыбысын тап та, жалауды көтер!",
-        "🚩",
-        "Жалауды көтер",
+      soundReaction(
+        "Дыбыстарды тыңда. «А» дыбысын естігенде жалауды көтер!",
+        "sound",
         ["А", "ы", "е", "а", "о", "ү", "а", "а", "и", "а", "у"],
-        isLetter("а")
-      ),
-      chipSelect(
-        "Буындардың ішінен А дыбысы бар буынды тап.",
+        isLetter("а"),
         "🚩",
-        "Жалауды көтер",
+        "Жалауды көтер"
+      ),
+      soundReaction(
+        "Буындарды тыңда. Ішінде А дыбысы барын естігенде жалауды көтер!",
+        "syllable",
         ["АЛ", "ІЛ", "ҮЛ", "АЛ", "ЫЛ", "ҰЛ", "ЛА", "ЛҰ", "ЛО"],
-        contains("а")
-      ),
-      chipSelect(
-        "Тағы да А дыбысы бар буындарды тап.",
+        contains("а"),
         "🚩",
-        "Жалауды көтер",
-        ["АРА", "ОЛА", "ҮЛ", "АЛА", "ЫЛ", "ИЛА", "ЛА", "ЛҰ", "ЛАО"],
-        contains("а")
+        "Жалауды көтер"
       ),
-      positionChoice("А дыбысы әр сөздің қай жерінде тұрғанын тап.", [
-        { word: "Бас", correct: "ортасында" },
-        { word: "аяқ", correct: "басында" },
-        { word: "арқа", correct: "басында және соңында" },
-        { word: "қас", correct: "ортасында" },
-        { word: "құлақ", correct: "ортасында" },
-        { word: "қарын", correct: "ортасында" },
-        { word: "шаш", correct: "ортасында" },
+      soundReaction(
+        "Сөздерді тыңда. Ішінде А дыбысы барын естігенде жалауды көтер!",
+        "word",
+        ["АРА", "ОЛА", "ҮЛ", "АЛА", "ЫЛ", "ИЛА", "ЛА", "ЛҰ", "ЛАО"],
+        contains("а"),
+        "🚩",
+        "Жалауды көтер"
+      ),
+      positionDetect("А дыбысы әр сөздің қай жерінде тұрғанын тап.", "hands", [
+        { word: "Бас", correct: "middle" },
+        { word: "аяқ", correct: "start" },
+        { word: "арқа", correct: "start" },
+        { word: "қас", correct: "middle" },
+        { word: "құлақ", correct: "middle" },
+        { word: "қарын", correct: "middle" },
+        { word: "шаш", correct: "middle" },
       ]),
     ],
   },
@@ -102,42 +145,43 @@ export const sections: Section[] = [
     color: "from-fuchsia-400 to-pink-400",
     ring: "ring-fuchsia-200",
     tasks: [
-      chipSelect(
-        "Ә дыбысын естігендей ойлан да, ешкінің дауысын сал!",
-        "🐐",
-        "Ешкінің дауысын сал",
+      soundReaction(
+        "Дыбыстарды тыңда. Ә дыбысын естігенде ешкінің дауысын сал!",
+        "sound",
         ["А", "ә", "ы", "е", "ә", "а", "о", "ү", "а", "ә", "и", "а", "у", "ә"],
-        isLetter("ә")
+        isLetter("ә"),
+        "🐐",
+        "Ешкінің дауысын сал"
       ),
-      chipSelect(
-        "Ә дыбысы бар буынды тауып, әтештің дауысын сал!",
-        "🐓",
-        "Әтештің дауысын сал",
+      soundReaction(
+        "Буындарды тыңда. Ішінде Ә дыбысы барын естігенде әтештің дауысын сал!",
+        "syllable",
         ["ӘН", "АҢ", "ҮЛ", "ІЛ", "ӘЛ", "ҰЛ", "ЛӘ", "ЛҰ", "ЛӨ"],
-        contains("ә")
+        contains("ә"),
+        "🐓",
+        "Әтештің дауысын сал"
       ),
-      positionChoice("Ә дыбысы сөздің қай жерінде тұр?", [
-        { word: "Әже", correct: "басында" },
-        { word: "сәукеле", correct: "ортасында" },
-        { word: "күнә", correct: "соңында" },
-        { word: "сәбіз", correct: "ортасында" },
+      positionDetect("Ә дыбысы сөздің қай жерінде тұр? Сөзді бас та, жеріне тап.", "segments", [
+        { word: "Әже", correct: "start" },
+        { word: "сәукеле", correct: "start" },
+        { word: "күнә", correct: "end" },
+        { word: "сәбіз", correct: "start" },
       ]),
-      letterFill("Сөздің бірінші әрпін Ә-ға алмастырып, жаңа сөз жаса.", [
-        { stem: "…н", options: ["ә", "о", "ы"], correct: "ә", result: "ән" },
-        { stem: "…р", options: ["е", "ә", "ұ"], correct: "ә", result: "әр" },
-        { stem: "…не", options: ["і", "ә", "ү"], correct: "ә", result: "әне" },
+      letterSwap("Ә әрпін бос орынға сүйреп апарып, жаңа сөз жаса.", "Ә", [
+        { before: "Ін", rest: "н", result: "Ән" },
+        { before: "Өр", rest: "р", result: "Әр" },
+        { before: "Ене", rest: "не", result: "Әне" },
+        { before: "Атыр", rest: "тір", result: "Әтір" },
+        { before: "Ай", rest: "й", result: "Әй" },
       ]),
-      countChoice("Сөзде неше дыбыс бар? Санап көр.", [
-        { word: "әке", correct: 3, options: [2, 3, 4] },
-        { word: "әпке", correct: 4, options: [3, 4, 5] },
-        { word: "әтеш", correct: 4, options: [3, 4, 5] },
-        { word: "сәукеле", correct: 7, options: [5, 6, 7] },
+      phonemeScheme("Сөздегі дыбыстарды санап, ұяшықтарды толтыр.", [
+        { word: "әке", sounds: ["ә", "к", "е"] },
+        { word: "әпке", sounds: ["ә", "п", "к", "е"] },
+        { word: "әже", sounds: ["ә", "ж", "е"] },
+        { word: "әтеш", sounds: ["ә", "т", "е", "ш"] },
+        { word: "сәукеле", sounds: ["с", "ә", "у", "к", "е", "л", "е"] },
       ]),
-      practice(
-        "Алдымен гүлді бір рет, «ә» әрпін екі рет — оң қолыңмен бас. Сосын сол қолыңмен қайтала.",
-        ["🌸 — 1 рет", "ә — 2 рет", "🌸 — 1 рет (сол қол)", "ә — 2 рет (сол қол)"],
-        "Дайын!"
-      ),
+      tracingCanvas("Гүлді бір рет сыз, «+» белгілерін дөңгелекте, «Ә» әрпін екі рет сыз.", "Ә"),
     ],
   },
   {
@@ -148,39 +192,40 @@ export const sections: Section[] = [
     color: "from-amber-400 to-yellow-400",
     ring: "ring-amber-200",
     tasks: [
-      chipSelect(
-        "Ө дыбысын тауып, ұзын қарындашты көрсет!",
-        "✏️",
-        "Ұзын қарындашты көрсет",
+      soundReaction(
+        "Дыбыстарды тыңда. «Ө» дыбысын естігенде ұзын қарандашты көрсет!",
+        "sound",
         ["Ұ", "Ө", "Ы", "О", "Ө", "І", "Ү", "Ө", "О", "Ұ", "Ө", "Ы", "О", "Ө"],
-        isLetter("ө")
+        isLetter("ө"),
+        "✏️",
+        "Ұзын қарандашты көрсет"
       ),
-      chipSelect(
-        "Буынның ішінен Ө дыбысын тауып, қысқа қарандашты көрсет!",
-        "🖊️",
-        "Қысқа қарандашты көрсет",
+      soundReaction(
+        "Буындарды тыңда. Ішінде Ө дыбысы барын естігенде қысқа қарандашты көрсет!",
+        "syllable",
         ["Ұр", "Өр", "Ор", "Ыр", "Өр", "Ір", "Ор", "Үр", "Өр", "Ұр", "Өр", "Ыр", "Ор", "Өр"],
-        contains("ө")
+        contains("ө"),
+        "🖊️",
+        "Қысқа қарандашты көрсет"
       ),
-      letterFill("Сөздің бірінші дыбысын Ө-ге алмастыр.", [
-        { stem: "от — …т", options: ["ө", "ә", "ы"], correct: "ө", result: "өт" },
-        { stem: "ор — …р", options: ["ұ", "ө", "е"], correct: "ө", result: "өр" },
-        { stem: "ермек — …рмек", options: ["і", "ө", "ұ"], correct: "ө", result: "өрмек" },
-        { stem: "әсер — …сер", options: ["ө", "ү", "а"], correct: "ө", result: "өсер" },
-        { stem: "енеге — …неге", options: ["е", "ө", "і"], correct: "ө", result: "өнеге" },
+      letterSwap("Ө әрпін бос орынға сүйреп апарып, жаңа сөз жаса.", "Ө", [
+        { before: "от", rest: "т", result: "өт" },
+        { before: "ермек", rest: "рмек", result: "өрмек" },
+        { before: "әмір", rest: "мір", result: "өмір" },
+        { before: "ор", rest: "р", result: "өр" },
+        { before: "әсер", rest: "сер", result: "өсер" },
+        { before: "енеге", rest: "неге", result: "өнеге" },
       ]),
-      letterFill("Сөздің екінші дыбысын Ө-ге алмастыр.", [
-        { stem: "керме — к…рме", options: ["ө", "е", "ұ"], correct: "ө", result: "көрме" },
-        { stem: "кәмір — к…мір", options: ["ә", "ө", "ү"], correct: "ө", result: "көмір" },
-        { stem: "тор — т…р", options: ["о", "ө", "ы"], correct: "ө", result: "төр" },
-        { stem: "шап — ш…п", options: ["а", "ө", "і"], correct: "ө", result: "шөп" },
-        { stem: "тал — т…л", options: ["ө", "а", "ы"], correct: "ө", result: "төл" },
+      letterSwap("Ө әрпін сөздің ортасына сүйреп апарып, жаңа сөз жаса.", "Ө", [
+        { before: "керме", prefix: "к", rest: "рме", result: "көрме" },
+        { before: "кәмір", prefix: "к", rest: "мір", result: "көмір" },
+        { before: "кірме", prefix: "к", rest: "рме", result: "көрме" },
+        { before: "тор", prefix: "т", rest: "р", result: "төр" },
+        { before: "шап", prefix: "ш", rest: "п", result: "шөп" },
+        { before: "тал", prefix: "т", rest: "л", result: "төл" },
       ]),
-      practice(
-        "Ұяшықтағы дөңгелектердің белін сол қолыңмен сыз. Олар Ө әрпіне қалай ұқсайды — ойлан.",
-        ["⚪➖ дөңгелек 1", "⚪➖ дөңгелек 2", "⚪➖ дөңгелек 3"],
-        "Байқадым!"
-      ),
+      strikeThrough("«О» дөңгелектерінің бірін сызып, «Ө» әрпіне айналдыр.", "Ө", 6),
+      infoSlide("Ө әріпіндегі дөңгелектер қайда, қалай тұрғанын айт."),
     ],
   },
   {
@@ -191,42 +236,48 @@ export const sections: Section[] = [
     color: "from-sky-400 to-cyan-400",
     ring: "ring-sky-200",
     tasks: [
-      chipSelect(
-        "Ү дыбысын тауып, дәптердің оң жақ төменгі бұрышын көрсет!",
-        "📓",
-        "Дәптердің бұрышын көрсет",
+      soundReaction(
+        "Дыбыстарды тыңда. «Ү» дыбысын естігенде дәптердің оң жақ төменгі бұрышын көрсет!",
+        "sound",
         ["Ұ", "Ө", "Ү", "Ы", "О", "Ө", "І", "Ү", "Ө", "Ү", "О", "Ұ", "Ө", "Ү", "Ы", "О", "Ө"],
-        isLetter("ү")
-      ),
-      chipSelect(
-        "Буынның ішінен Ү дыбысы барын тап.",
+        isLetter("ү"),
         "📓",
-        "Дәптердің бұрышын көрсет",
+        "Дәптердің оң жақ төменгі бұрышы"
+      ),
+      soundReaction(
+        "Буындарды тыңда. Ішінде Ү дыбысы барын естігенде дәптердің оң жақ төменгі бұрышын көрсет!",
+        "syllable",
         ["Ұр", "Өр", "Үр", "Ор", "Ыр", "Үр", "Өр", "Ір", "Ор", "Үр", "Өр", "Ұр", "Үр", "Өр", "Ыр", "Ор", "Үр", "Өр"],
-        contains("ү")
+        contains("ү"),
+        "📓",
+        "Дәптердің оң жақ төменгі бұрышы"
       ),
-      positionChoice("Ү дыбысы сөздің басында ма, ортасында ма?", [
-        { word: "Үкі", correct: "басында" },
-        { word: "бүркіт", correct: "ортасында" },
-        { word: "үйрек", correct: "басында" },
-        { word: "сүлгі", correct: "ортасында" },
-        { word: "үміт", correct: "басында" },
-        { word: "сүргі", correct: "ортасында" },
-        { word: "күрке", correct: "ортасында" },
-        { word: "үйшік", correct: "басында" },
+      positionDetect("Ү дыбысы сөздің қай жерінде тұрғанын тап.", "notebook", [
+        { word: "Үкі", correct: "start" },
+        { word: "бүркіт", correct: "middle" },
+        { word: "үйрек", correct: "start" },
+        { word: "сүлгі", correct: "middle" },
+        { word: "үміт", correct: "start" },
+        { word: "сүргі", correct: "middle" },
+        { word: "күрке", correct: "middle" },
+        { word: "үйшік", correct: "start" },
       ]),
-      letterFill("Сөздің дыбысын Ү-ге алмастырып, жаңа сөз тап.", [
-        { stem: "ұн — …н", options: ["ү", "і", "о"], correct: "ү", result: "үн" },
-        { stem: "іш — …ш", options: ["е", "ү", "ы"], correct: "ү", result: "үш" },
-        { stem: "жыр — ж…р", options: ["ү", "ұ", "і"], correct: "ү", result: "жүр" },
-        { stem: "тер — т…р", options: ["і", "ү", "ы"], correct: "ү", result: "түр" },
-        { stem: "жан — ж…н", options: ["ү", "а", "о"], correct: "ү", result: "жүн" },
+      letterSwap("Ү әрпін бос орынға сүйреп апарып, жаңа сөз жаса.", "Ү", [
+        { before: "ермек", rest: "рмек", result: "үрмек" },
+        { before: "ұн", rest: "н", result: "үн" },
+        { before: "әзер", rest: "зер", result: "үзер" },
+        { before: "іш", rest: "ш", result: "үш" },
       ]),
-      practice(
-        "Ү әрпінің үзік сызықтарын сол қолыңмен үстінен бастыр. Сосын суретін оң қолыңмен ұяшыққа сал.",
-        ["Ү – – – –", "🖼️ сурет салу"],
-        "Дайын!"
-      ),
+      letterSwap("Ү әрпін сөздің ортасына сүйреп апарып, жаңа сөз жаса.", "Ү", [
+        { before: "керме", prefix: "к", rest: "рме", result: "күрме" },
+        { before: "жыр", prefix: "ж", rest: "р", result: "жүр" },
+        { before: "кірме", prefix: "к", rest: "рме", result: "күрме" },
+        { before: "тер", prefix: "т", rest: "р", result: "түр" },
+        { before: "жан", prefix: "ж", rest: "н", result: "жүн" },
+        { before: "тал", prefix: "т", rest: "л", result: "түл" },
+      ]),
+      tracingCanvas("Сол жақта нүктелі үлгі бойынша, оң жақта еркін «Ү» әрпін сыз.", "Ү", "trace-free"),
+      blackboard("Оқушы тақтаға «Ү» әріпін сызуы керек.", "Ү"),
     ],
   },
   {
@@ -237,43 +288,48 @@ export const sections: Section[] = [
     color: "from-lime-400 to-green-400",
     ring: "ring-lime-200",
     tasks: [
-      chipSelect(
-        "І дыбысын тауып, жымиған смайликті бас!",
-        "😊",
-        "Жымиған смайликті бас",
+      soundReaction(
+        "Дыбыстарды тыңда. «І» дыбысын естігенде жымиған смайликті бас!",
+        "sound",
         ["І", "Ө", "Ү", "І", "Ө", "І", "Ы", "Ү", "Ө", "Ү", "І", "О", "Ұ", "Ө", "І"],
-        isLetter("і")
+        isLetter("і"),
+        "🙂",
+        "Жымиған смайликті бас"
       ),
-      chipSelect(
-        "Буынның ішінен І дыбысы барын тап.",
-        "😊",
-        "Жымиған смайликті бас",
+      soundReaction(
+        "Буындарды тыңда. Ішінде І дыбысы барын естігенде жымиған смайликті бас!",
+        "syllable",
         ["Ұр", "Ір", "Үр", "Ор", "Ыр", "Ір", "Өр", "Ір", "Ор", "Үр", "Өр", "Ұр", "Ір"],
-        contains("і")
+        contains("і"),
+        "🙂",
+        "Жымиған смайликті бас"
       ),
-      positionChoice("І дыбысы сөздің қай жерінде тұр?", [
-        { word: "Ілгіш", correct: "басында" },
-        { word: "киім", correct: "ортасында" },
-        { word: "сүлгі", correct: "соңында" },
-        { word: "ішік", correct: "басында" },
-        { word: "мәсі", correct: "соңында" },
+      positionDetect("Сөзді тыңда. І дыбысы басында болса — қабағын түйген, ортасында болса — күлген смайликті бас.", "face", [
+        { word: "Ілгіш", correct: "start" },
+        { word: "киім", correct: "middle" },
+        { word: "сүлгі", correct: "middle" },
+        { word: "ішік", correct: "start" },
+        { word: "мәсі", correct: "middle" },
       ]),
-      letterFill("Сөздің бірінші дыбысын І-ге алмастыр.", [
-        { stem: "өш — …ш", options: ["і", "е", "ы"], correct: "і", result: "іш" },
-        { stem: "ұн — …н", options: ["е", "і", "ө"], correct: "і", result: "ін" },
-        { stem: "ел — …л", options: ["і", "ы", "ө"], correct: "і", result: "іл" },
-        { stem: "өс — …с", options: ["ы", "ө", "і"], correct: "і", result: "іс" },
+      syllablePractice("Буындарды тыңда, қайталап айт. Керек болса, ретін керісінше бұрып та тыңда:", [
+        ["іс", "ыс", "іс"],
+        ["іре", "ірө", "ірі"],
+        ["екі", "екы", "екү"],
+        ["ін", "ән", "ін"],
+        ["ірө", "ірү", "ірө"],
+        ["ікі", "ікө", "ікү"],
+        ["іл", "өл", "іл"],
+        ["ілә", "ілө", "ілу"],
+        ["ісу", "ісә", "ісө"],
       ]),
-      practice(
-        "Буындарды оқы, содан кейін керісінше айтып көр:",
-        ["ис — ыс — іс", "ін —ән — ін", "іл — өл — іл", "іре — ірө — ірі", "екі — екы — екү"],
-        "Оқып шықтым!"
-      ),
-      practice(
-        "Бірінші Ү әрпінің үстінен, содан соң І әрпінің үстінен екі қолыңмен бір мезгілде бастыр.",
-        ["Ү – – – –", "І – – – –"],
-        "Дайын!"
-      ),
+      letterSwap("І әрпін бос орынға сүйреп апарып, жаңа сөз жаса.", "І", [
+        { before: "өш", rest: "ш", result: "іш" },
+        { before: "ұн", rest: "н", result: "ін" },
+        { before: "ел", rest: "л", result: "іл" },
+        { before: "өс", rest: "с", result: "іс" },
+      ]),
+      tracingCanvas("Алдымен «Ү» әрпінің үстінен екі қолыңмен бір мезгілде сыз.", "Ү"),
+      tracingCanvas("Енді «І» әрпінің үстінен екі қолыңмен бір мезгілде сыз.", "І"),
     ],
   },
   {
@@ -284,48 +340,64 @@ export const sections: Section[] = [
     color: "from-teal-400 to-emerald-400",
     ring: "ring-teal-200",
     tasks: [
-      chipSelect(
-        "Қ дыбысын тауып, алақаныңды бір рет соқ!",
-        "👏",
-        "Алақаныңды соқ",
+      soundReaction(
+        "Дыбыстарды тыңда. «Қ» дыбысын естігенде алақаныңды бір рет соқ!",
+        "sound",
         ["Ғ", "Қ", "Х", "Һ", "Қ", "Ғ", "Х", "Қ"],
-        isLetter("қ")
-      ),
-      chipSelect(
-        "Буынның ішінен Қ дыбысы барын тап.",
+        isLetter("қ"),
         "👏",
-        "Алақаныңды соқ",
+        "Алақаныңды 1 рет соқ"
+      ),
+      soundReaction(
+        "Буындарды тыңда. Ішінде Қ дыбысы барын естігенде алақаныңды екі рет соқ!",
+        "syllable",
         ["АХ", "АҚ", "АҒ", "АҺ", "АҚ", "АХ", "АҺ", "АҚ"],
-        contains("қ")
+        contains("қ"),
+        "👏🏻👏🏻",
+        "2 рет соқ"
       ),
-      positionChoice("Қ дыбысы сөздің қай жерінде тұр?", [
-        { word: "Қоян", correct: "басында" },
-        { word: "арқар", correct: "ортасында" },
-        { word: "мысық", correct: "соңында" },
-        { word: "қарға", correct: "басында" },
-        { word: "тауық", correct: "соңында" },
-        { word: "қой", correct: "басында" },
-        { word: "қошқар", correct: "басында және ортасында" },
+      positionDetect(
+        "Қ дыбысы сөздің қай жерінде тұрғанын тап: басында — 1 рет соқ, ортасында — 2 рет соқ, соңында — тап.",
+        "clap",
+        [
+          { word: "Қоян", correct: "start" },
+          { word: "арқар", correct: "middle" },
+          { word: "мысық", correct: "end" },
+          { word: "қарға", correct: "start" },
+          { word: "тауық", correct: "end" },
+          { word: "қой", correct: "start" },
+          { word: "қошқар", correct: "middle" },
+        ]
+      ),
+      syllablePractice("Буындарды тыңда, қайталап айт. Керек болса, ретін керісінше бұрып та тыңда:", [
+        ["ақ", "ах", "ақ"],
+        ["аха", "ақа", "аһа"],
+        ["ақа", "аһа", "ақа"],
+        ["ұқ", "ух", "оқ"],
+        ["ақа", "аға", "ақа"],
       ]),
-      practice(
-        "Буындарды оқы, содан кейін керісінше айтып көр:",
-        ["ақ — ах — ақ", "аха — ақа — аһа", "ақа — аһа — ақа", "ұқ — ух — оқ"],
-        "Оқып шықтым!"
-      ),
-      letterFill("Сөздің бірінші дыбысын Қ-ға алмастыр.", [
-        { stem: "тас — …ас", options: ["қ", "к", "х"], correct: "қ", result: "қас" },
-        { stem: "той — …ой", options: ["ғ", "қ", "к"], correct: "қ", result: "қой" },
-        { stem: "таз — …аз", options: ["к", "х", "қ"], correct: "қ", result: "қаз" },
-        { stem: "шаш — …аш", options: ["қ", "ш", "ғ"], correct: "қ", result: "қаш" },
+      letterSwap("Қ әрпін бос орынға сүйреп апарып, жаңа сөз жаса.", "Қ", [
+        { before: "тас", rest: "ас", result: "қас" },
+        { before: "той", rest: "ой", result: "қой" },
+        { before: "таз", rest: "аз", result: "қаз" },
+        { before: "шаш", rest: "аш", result: "қаш" },
+      ]),
+      imageWord("Суреттегі аңды ата, «Қ» дыбысы қай жерде тұрғанын тап, сөйлем құра.", "Қ", [
+        { image: "/wolf.jpg", word: "Қасқыр" },
+        { image: "/rabbit.jpg", word: "Қоян" },
+        { image: "/lamb.jpg", word: "Қозы" },
       ]),
       buildWord(
         "Буындардан сөз құра.",
-        ["қа", "ла", "лам", "қар", "ға", "мақ"],
+        ["қа", "қа", "қа", "ла", "лам", "қар", "ға", "мақ"],
         [
+          { target: "қала", tiles: ["қа", "ла"] },
           { target: "қалам", tiles: ["қа", "лам"] },
           { target: "қарға", tiles: ["қар", "ға"] },
+          { target: "қамақ", tiles: ["қа", "мақ"] },
         ]
       ),
+      tracingCanvas("«Қ» әрпінің үстінен екі қолыңмен бір мезгілде сыз.", "Қ"),
     ],
   },
   {
@@ -336,42 +408,39 @@ export const sections: Section[] = [
     color: "from-violet-400 to-indigo-400",
     ring: "ring-violet-200",
     tasks: [
-      chipSelect(
-        "Ғ дыбысын тауып, үстелді бір рет ұр!",
-        "🥁",
-        "Үстелді ұр",
+      soundReaction(
+        "Дыбыстарды тыңда. «Ғ» дыбысын естігенде үстелді 1 рет ұр!",
+        "sound",
         ["Г", "Ғ", "Қ", "Х", "Ғ", "Һ", "Қ", "Ғ", "Х"],
-        isLetter("ғ")
+        isLetter("ғ"),
+        "✊",
+        "Үстелді 1 рет ұр"
       ),
-      chipSelect(
-        "Буынның ішінен Ғ дыбысы барын тап.",
-        "🥁",
-        "Үстелді ұр",
+      soundReaction(
+        "Буындарды тыңда. Ішінде Ғ дыбысы барын естігенде үстелді 2 рет ұр!",
+        "syllable",
         ["ҚА", "ҒА", "ҺА", "ҚА", "ҒА", "ХА", "ҒА", "ҚА"],
-        contains("ғ")
+        contains("ғ"),
+        "✊✊",
+        "Үстелді 2 рет ұр"
       ),
-      chipSelect(
-        "Сөз тіркестерінің ішінен Ғ дыбысы барын тап.",
-        "🥁",
-        "Үстелді ұр",
-        ["АҒА", "АҚА", "АҒА", "АХА", "АҺА", "АҒА", "АҚА"],
-        contains("ғ")
-      ),
-      chipSelect(
-        "Сөздердің ішінен Ғ дыбысы барын тап.",
-        "🥁",
-        "Үстелді ұр",
+      syllablePractice("Тіркесті тыңда, қайталап айт:", [["АҒА", "АҚА", "АҒА", "АХА", "АҺА", "АҒА", "АҚА"]]),
+      soundReaction(
+        "Сөздерді тыңда. Ішінде Ғ дыбысы барын естігенде «Ғ» батырмасын бас!",
+        "word",
         ["аға", "хат", "таға", "қара", "ғалам", "қарыс", "ғарыш"],
-        contains("ғ")
+        contains("ғ"),
+        "Ғ",
+        "Ғ әріпін бас"
       ),
-      letterFill("Сөздің бірінші дыбысын Ғ-ға алмастыр.", [
-        { stem: "қашық — …ашық", options: ["ғ", "қ", "х"], correct: "ғ", result: "ғашық" },
-        { stem: "қалам — …алам", options: ["қ", "ғ", "к"], correct: "ғ", result: "ғалам" },
-        { stem: "қарыш — …арыш", options: ["х", "ғ", "қ"], correct: "ғ", result: "ғарыш" },
+      letterSwap("Ғ әрпін бос орынға сүйреп апарып, жаңа сөз жаса.", "Ғ", [
+        { before: "қашық", rest: "ашық", result: "ғашық" },
+        { before: "қалам", rest: "алам", result: "ғалам" },
+        { before: "қарыш", rest: "арыш", result: "ғарыш" },
       ]),
       buildWord(
         "Әріптерден сөз құра.",
-        ["ғ", "а", "а", "т", "ғ", "а", "а"],
+        ["ғ", "ғ", "а", "а", "а", "а", "т"],
         [
           { target: "аға", tiles: ["а", "ғ", "а"] },
           { target: "таға", tiles: ["т", "а", "ғ", "а"] },
@@ -380,10 +449,11 @@ export const sections: Section[] = [
       colorShapes(
         "Суреттегі фигураларды түсіне қарай бояп шық.",
         [
-          { key: "top-left", colorName: "жасыл", colorHex: "#22c55e" },
-          { key: "top-right", colorName: "қызыл", colorHex: "#ef4444" },
-          { key: "bottom-left", colorName: "сары", colorHex: "#eab308" },
-          { key: "bottom-right", colorName: "көк", colorHex: "#3b82f6" },
+          { key: "top-left", colorName: "жасыл", colorHex: "#22c55e", shape: "square" },
+          { key: "top-right", colorName: "қызыл", colorHex: "#ef4444", shape: "triangle" },
+          { key: "bottom-left", colorName: "сары", colorHex: "#eab308", shape: "circle" },
+          { key: "bottom-right", colorName: "көк", colorHex: "#3b82f6", shape: "trapezoid" },
+          { key: "extra", colorName: "күлгін", colorHex: "#a855f7", shape: "letter", letterText: "Қ" },
         ]
       ),
     ],
@@ -396,43 +466,54 @@ export const sections: Section[] = [
     color: "from-orange-400 to-red-400",
     ring: "ring-orange-200",
     tasks: [
-      chipSelect(
-        "Ң дыбысын тауып, бір рет шапалақта!",
-        "👏",
-        "Шапалақта",
+      soundReaction(
+        "Дыбыстарды тыңда. «Ң» дыбысын естігенде бір рет шапалақта!",
+        "sound",
         ["М", "Н", "Ң", "Л", "М", "Ң", "Л", "Н"],
-        isLetter("ң")
-      ),
-      chipSelect(
-        "Буынның ішінен Ң дыбысы барын тап.",
+        isLetter("ң"),
         "👏",
-        "Шапалақта",
+        "1 рет шапалақта"
+      ),
+      soundReaction(
+        "Буындарды тыңда. Ішінде Ң дыбысы барын естігенде екі рет шапалақта!",
+        "syllable",
         ["АЛ", "АН", "АҢ", "МА", "АЛ", "АН", "АҢ"],
-        contains("ң")
+        contains("ң"),
+        "👏🏻👏🏻",
+        "2 рет шапалақта"
       ),
-      positionChoice("Ң дыбысы сөздің қай жерінде тұр?", [
-        { word: "Аң", correct: "соңында" },
-        { word: "шаңғы", correct: "ортасында" },
-        { word: "қараңғы", correct: "ортасында" },
-        { word: "сараң", correct: "соңында" },
-        { word: "қоңыз", correct: "ортасында" },
+      positionDetect(
+        "Ң дыбысы сөздің қай жерінде тұрғанын тап: басында — 1 рет, ортасында — 2 рет, соңында — 3 рет шапалақта.",
+        "clap-count",
+        [
+          { word: "Аң", correct: "end" },
+          { word: "шаңғы", correct: "middle" },
+          { word: "қараңғы", correct: "middle" },
+          { word: "сараң", correct: "end" },
+          { word: "қоңыз", correct: "middle" },
+        ]
+      ),
+      letterSwap("Ң әрпін сөздің ортасына сүйреп апарып, жаңа сөз жаса.", "Ң", [
+        { before: "көміл", prefix: "кө", rest: "іл", result: "көңіл" },
+        { before: "жамыл", prefix: "жа", rest: "ыл", result: "жаңыл" },
       ]),
-      letterFill("Сөздің ортаңғы дыбысын Ң-ге алмастыр.", [
-        { stem: "көміл — кө…іл", options: ["ң", "м", "н"], correct: "ң", result: "көңіл" },
-        { stem: "жамыл — жа…ыл", options: ["м", "ң", "л"], correct: "ң", result: "жаңыл" },
+      spatialDrag("Сөзді тыңда: «н» дыбысы болса 🔵 көк үшбұрышты, «ң» дыбысы болса 🟡 сары үшбұрышты тиісті бұрышқа сүйреп апар.", "ң", [
+        { word: "көн", correct: "plain" },
+        { word: "көң", correct: "target" },
+        { word: "сең", correct: "target" },
+        { word: "сен", correct: "plain" },
+        { word: "тен", correct: "plain" },
+        { word: "тең", correct: "target" },
+        { word: "кен", correct: "plain" },
+        { word: "кең", correct: "target" },
+        { word: "шын", correct: "plain" },
+        { word: "шың", correct: "target" },
+        { word: "шарын", correct: "plain" },
+        { word: "шарың", correct: "target" },
+        { word: "қарын", correct: "plain" },
+        { word: "қарың", correct: "target" },
       ]),
-      chipSelect(
-        "Ң дыбысы бар сөзді тап та, сары үшбұрышты көрсет.",
-        "🔺",
-        "Сары үшбұрышты көрсет",
-        ["көн", "көң", "сең", "сен", "тен", "тең", "кен", "кең", "шын", "шың", "шарын", "шарың", "қарын", "қарың"],
-        contains("ң")
-      ),
-      practice(
-        "Н әрпін оң қолыңмен, содан кейін Ң әрпін де оң қолыңмен бастыр.",
-        ["Н – – – –", "Ң – – – –"],
-        "Дайын!"
-      ),
+      tracingCanvas("«Ң» әрпінің үстінен оң қолыңмен сыз.", "Ң"),
     ],
   },
 ];
